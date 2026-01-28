@@ -7,31 +7,5 @@
     "outputDirectory": ".next",
     "regions": [
         "sin1"
-    ],
-    "env": {
-        "NEXT_PUBLIC_SUPABASE_URL": {
-            "type": "string",
-            "description": "Supabase project URL"
-        },
-        "NEXT_PUBLIC_SUPABASE_ANON_KEY": {
-            "type": "string",
-            "description": "Supabase anonymous key"
-        },
-        "SUPABASE_SERVICE_ROLE_KEY": {
-            "type": "secret",
-            "description": "Supabase service role key"
-        },
-        "NEXT_PUBLIC_WHATSAPP_NUMBER": {
-            "type": "string",
-            "description": "WhatsApp business number (format: 62xxxxxxxxxx)"
-        },
-        "NEXT_PUBLIC_BUSINESS_PHONE": {
-            "type": "string",
-            "description": "Business phone number"
-        },
-        "NEXT_PUBLIC_SITE_URL": {
-            "type": "string",
-            "description": "Production site URL"
-        }
-    }
+    ]
 }
