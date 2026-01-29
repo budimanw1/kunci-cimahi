@@ -28,7 +28,7 @@ export default function AdminDashboardPage() {
     })
     const [loading, setLoading] = useState(true)
     const [dateRange, setDateRange] = useState<DateRange | undefined>({
-        from: subDays(new Date(), 30),
+        from: subDays(new Date(), 90),
         to: new Date(),
     })
 
@@ -66,7 +66,9 @@ export default function AdminDashboardPage() {
                     const audio = new Audio('/notification.mp3') // Placeholder, browser default beep might suffice or need file
                 }
             })
-            .subscribe()
+            .subscribe((status) => {
+                console.log('Realtime Status:', status)
+            })
 
         return () => {
             subscription.unsubscribe()
