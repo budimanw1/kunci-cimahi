@@ -281,21 +281,24 @@ export default function AdminDashboardPage() {
                         <h1 className="text-3xl font-bold mb-2">Dashboard Admin</h1>
                         <p className="text-muted-foreground">Kelola pesanan dan statistik bisnis</p>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-wrap items-center gap-2 md:gap-4 w-full md:w-auto">
                         {/* Realtime Status Indicator */}
-                        <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-full border text-xs font-medium shadow-sm">
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-full border text-xs font-medium shadow-sm whitespace-nowrap">
                             <div className={`w-2 h-2 rounded-full ${realtimeStatus === 'SUBSCRIBED' ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
-                            {realtimeStatus === 'SUBSCRIBED' ? 'Live Updates On' : 'Connecting...'}
+                            {realtimeStatus === 'SUBSCRIBED' ? 'Live' : 'Connecting'}
                         </div>
 
-                        <Button variant="outline" size="sm" onClick={handleTestNotification}>
+                        <Button variant="outline" size="sm" onClick={handleTestNotification} className="whitespace-nowrap">
                             <Bell className="w-4 h-4 mr-2" />
-                            Tes Notif
+                            Tes
                         </Button>
 
-                        <DatePickerWithRange date={dateRange} setDate={setDateRange} />
-                        <Button variant="outline" onClick={handleLogout}>
-                            Logout
+                        <div className="w-full md:w-auto">
+                            <DatePickerWithRange date={dateRange} setDate={setDateRange} />
+                        </div>
+
+                        <Button variant="outline" size="icon" onClick={handleLogout} title="Logout">
+                            <X className="h-4 w-4" />
                         </Button>
                     </div>
                 </div>
@@ -347,8 +350,8 @@ export default function AdminDashboardPage() {
                     </Card>
                 </div>
 
-                {/* Bookings Table */}
-                <Card className="overflow-hidden">
+                {/* Bookings Table (Desktop) */}
+                <Card className="hidden md:block overflow-hidden">
                     <CardHeader>
                         <CardTitle>Daftar Booking</CardTitle>
                     </CardHeader>
@@ -447,6 +450,104 @@ export default function AdminDashboardPage() {
                         </div>
                     </CardContent>
                 </Card>
+
+                {/* Mobile Booking List (Cards) */}
+                <div className="md:hidden space-y-4">
+                    <h2 className="text-lg font-semibold mb-4 px-1">Daftar Booking</h2>
+                    {bookings.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground bg-white rounded-lg border p-4">
+                            Tidak ada booking pada periode ini
+                        </div>
+                    ) : (
+                        bookings.map((booking) => (
+                            <Card key={booking.id} className="overflow-hidden">
+                                <CardContent className="p-4 space-y-4">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <div className="font-mono text-sm font-bold text-blue-600">{booking.ticket_id}</div>
+                                            <div className="text-xs text-muted-foreground">
+                                                {new Date(booking.created_at).toLocaleString('id-ID', {
+                                                    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                                                })}
+                                            </div>
+                                        </div>
+                                        <Badge variant={getStatusBadgeVariant(booking.status)}>
+                                            {getStatusLabel(booking.status)}
+                                        </Badge>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <div className="flex items-start gap-2">
+                                            <div className="w-20 text-xs text-muted-foreground shrink-0">Pelanggan:</div>
+                                            <div className="text-sm font-medium">
+                                                {booking.customer_name}
+                                                <div className="text-xs text-muted-foreground font-normal">{booking.phone_number}</div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-start gap-2">
+                                            <div className="w-20 text-xs text-muted-foreground shrink-0">Lokasi:</div>
+                                            <div className="text-sm flex-1">{booking.location}</div>
+                                        </div>
+                                        <div className="flex items-start gap-2">
+                                            <div className="w-20 text-xs text-muted-foreground shrink-0">Masalah:</div>
+                                            <div className="text-sm flex-1">{booking.problem_type}</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-3 border-t flex flex-col gap-3">
+                                        <div className="flex items-center justify-between">
+                                            <Select
+                                                value={booking.status}
+                                                onChange={(e) => updateBookingStatus(booking.id, e.target.value as Booking['status'])}
+                                                className="text-xs h-8 w-full max-w-[140px] px-2 py-0"
+                                            >
+                                                <option value="pending">Menunggu</option>
+                                                <option value="on_the_way">Perjalanan</option>
+                                                <option value="completed">Selesai</option>
+                                            </Select>
+
+                                            <div className="flex items-center gap-2">
+                                                {editingId === booking.id ? (
+                                                    <div className="flex items-center gap-1">
+                                                        <Input
+                                                            type="number"
+                                                            value={editPrice}
+                                                            onChange={(e) => setEditPrice(e.target.value)}
+                                                            className="h-8 w-24 text-right"
+                                                        />
+                                                        <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600" onClick={() => savePrice(booking.id)}>
+                                                            <Save className="h-4 w-4" />
+                                                        </Button>
+                                                        <Button size="icon" variant="ghost" className="h-8 w-8 text-red-600" onClick={cancelEditing}>
+                                                            <X className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-2 cursor-pointer" onClick={() => startEditing(booking)}>
+                                                        <span className="font-bold text-lg">
+                                                            {booking.price ? formatCurrency(booking.price) : '-'}
+                                                        </span>
+                                                        <Edit2 className="h-3 w-3 text-muted-foreground" />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="w-full text-red-500 hover:text-red-700 hover:bg-red-50 h-8 font-normal text-xs"
+                                            onClick={() => deleteBooking(booking.id)}
+                                        >
+                                            <Trash2 className="h-3 w-3 mr-2" />
+                                            Hapus Booking
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))
+                    )}
+                </div>
             </div>
         </div>
     )
