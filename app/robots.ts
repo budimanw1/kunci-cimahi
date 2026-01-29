@@ -1,8 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kunci-cimahi.vercel.app'
-    const sitemapUrl = baseUrl.endsWith('/') ? `${baseUrl}sitemap.xml` : `${baseUrl}/sitemap.xml`
+    const baseUrl = 'https://kunci-cimahi.vercel.app'
 
     return {
         rules: {
@@ -10,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
             allow: '/',
             disallow: ['/admin', '/api'],
         },
-        sitemap: sitemapUrl,
+        sitemap: `${baseUrl}/sitemap.xml`,
     }
 }

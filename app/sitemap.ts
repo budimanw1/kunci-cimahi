@@ -2,8 +2,9 @@ import { MetadataRoute } from 'next'
 import { AREAS } from '@/lib/utils'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kunci-cimahi.vercel.app'
-    const lastModified = new Date()
+    // Hardcode production URL for maximum stability with GSC
+    const baseUrl = 'https://kunci-cimahi.vercel.app'
+    const lastModified = new Date('2026-01-29')
 
     const routes = [
         '',
