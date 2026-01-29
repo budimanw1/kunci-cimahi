@@ -131,7 +131,7 @@ export default async function HomePage() {
                                 </Button>
                             </Link>
                             <Link href="/layanan">
-                                <Button variant="outline" size="xl" className="w-full sm:w-auto hover:bg-white/10">
+                                <Button variant="outline" size="xl" className="w-full sm:w-auto bg-transparent border-white/20 text-white hover:bg-white/10">
                                     Lihat Semua Layanan
                                 </Button>
                             </Link>
