@@ -47,7 +47,7 @@ export function ServiceCard({
                 </div>
             </CardContent>
             <CardFooter>
-                <Link href="/booking" className="w-full">
+                <Link href="/pesan" className="w-full">
                     <Button variant="gold" className="w-full">
                         Pesan Sekarang
                     </Button>
