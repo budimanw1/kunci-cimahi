@@ -1,3 +1,5 @@
+import { Metadata } from 'next'
+import { generateMetadata } from '@/lib/metadata'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ServiceCard } from '@/components/service-card'
@@ -7,6 +9,12 @@ import { Testimonial, Service } from '@/lib/types'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { generateFAQSchema } from '@/lib/metadata'
 import { supabase } from '@/lib/supabase'
+
+export const metadata: Metadata = generateMetadata({
+    title: 'Tukang Kunci Cimahi 24 Jam',
+    description: 'Jasa tukang kunci panggilan 24 jam di Cimahi Selatan & Leuwigajah. Ahli kunci motor, mobil, immobilizer, dan brankas. Teknisi profesional datang ke lokasi.',
+    path: '/',
+})
 
 const faqs = [
     {
@@ -322,7 +330,7 @@ export default async function HomePage() {
                     <p className="text-xl mb-8 text-blue-100">
                         Hubungi kami kapan saja, kami siap membantu 24/7
                     </p>
-                    <Link href="/booking">
+                    <Link href="/pesan">
                         <Button variant="gold" size="xl" className="shadow-lg hover:shadow-xl">
                             <Phone className="mr-2 h-5 w-5" />
                             Hubungi Sekarang
