@@ -84,6 +84,9 @@ export function generateMetadata(page?: {
                 'max-snippet': -1,
             },
         },
+        verification: {
+            google: 'RTabTLce6yd0HHOnFrqN6fCIyNVtHS-NexghMjfq2a0',
+        },
     }
 }
 
