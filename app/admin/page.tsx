@@ -94,7 +94,7 @@ export default function AdminDashboardPage() {
             })
             .subscribe((status) => {
                 console.log('Realtime Status:', status)
-                setRealtimeStatus(status)
+                setRealtimeStatus(status as any)
             })
 
         return () => {
