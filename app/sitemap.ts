@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next'
+import { AREAS } from '@/lib/utils'
 
 export default function sitemap(): MetadataRoute.Sitemap {
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://kunci-cimahi.vercel.app'
@@ -28,5 +29,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
             changeFrequency: 'monthly',
             priority: 0.7,
         },
+        ...AREAS.map((area) => ({
+            url: `${baseUrl}/layanan/${area.slug}`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly' as const,
+            priority: 0.8,
+        })),
     ]
 }

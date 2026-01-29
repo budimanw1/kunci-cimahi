@@ -70,3 +70,24 @@ export function generateCustomerWhatsAppMessage(ticketId: string, customerName: 
         `Layanan 24/7 - Bundaran Leuwigajah, Cimahi Selatan`
     )
 }
+// Target Areas for SEO
+export const AREAS = [
+    { slug: 'leuwigajah', name: 'Leuwigajah' },
+    { slug: 'cibeber', name: 'Cibeber' },
+    { slug: 'utama', name: 'Utama' },
+    { slug: 'baros', name: 'Baros' },
+    { slug: 'melong', name: 'Melong' },
+    { slug: 'cimahi-selatan', name: 'Cimahi Selatan' },
+    { slug: 'cimahi-tengah', name: 'Cimahi Tengah' },
+    { slug: 'cimahi-utara', name: 'Cimahi Utara' },
+    { slug: 'cibabat', name: 'Cibabat' },
+    { slug: 'pasirkaliki', name: 'Pasirkaliki' },
+    { slug: 'citeureup', name: 'Citeureup' },
+    { slug: 'cipageran', name: 'Cipageran' },
+    { slug: 'karangmekar', name: 'Karangmekar' },
+    { slug: 'padasuka', name: 'Padasuka' },
+    { slug: 'setiamanah', name: 'Setiamanah' },
+    { slug: 'margaasih', name: 'Margaasih' },
+    { slug: 'lagadar', name: 'Lagadar' },
+    { slug: 'nanjung', name: 'Nanjung' },
+]
