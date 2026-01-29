@@ -2,8 +2,9 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ServiceCard } from '@/components/service-card'
 import { TestimonialCarousel } from '@/components/testimonial-carousel'
-import { Key, Clock, MapPin, Phone, Wrench, Home, Car, Bike } from 'lucide-react'
-import { Testimonial } from '@/lib/types'
+import { Key, Clock, MapPin, Phone, Wrench, Home, Car, Bike, Lock, Shield } from 'lucide-react'
+import { Testimonial, Service } from '@/lib/types'
+import { supabase } from '@/lib/supabase'
 
 // Mock testimonials - in production, fetch from Supabase
 const testimonials: Testimonial[] = [
@@ -39,7 +40,35 @@ const testimonials: Testimonial[] = [
     },
 ]
 
-export default function HomePage() {
+// Helper to get icon based on category/name
+const getServiceIcon = (service: Service) => {
+    const title = service.title.toLowerCase()
+    const category = service.category.toLowerCase()
+
+    if (title.includes('motor')) return Bike
+    if (title.includes('mobil')) return Car
+    if (title.includes('rumah')) return Home
+    if (title.includes('brankas')) return Shield
+    if (title.includes('patah')) return Wrench
+    if (title.includes('hilang')) return Key
+
+    if (category === 'motor') return Bike
+    if (category === 'mobil') return Car
+    if (category === 'rumah') return Home
+
+    return Key
+}
+
+export const revalidate = 0 // Disable cache for real-time updates
+
+export default async function HomePage() {
+    // Fetch Services
+    const { data: services } = await supabase
+        .from('services')
+        .select('*')
+        .limit(4)
+        .order('created_at', { ascending: true })
+
     return (
         <div className="flex flex-col">
             {/* Hero Section */}
@@ -129,38 +158,39 @@ export default function HomePage() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <ServiceCard
-                            icon={Bike}
-                            name="Duplikat Kunci Motor"
-                            description="Pembuatan kunci motor duplikat semua merk"
-                            priceStart={25000}
-                            estimatedTime="10 menit"
-                            category="motor"
-                        />
-                        <ServiceCard
-                            icon={Car}
-                            name="Duplikat Kunci Mobil"
-                            description="Duplikat kunci mobil dengan teknologi terkini"
-                            priceStart={75000}
-                            estimatedTime="20 menit"
-                            category="mobil"
-                        />
-                        <ServiceCard
-                            icon={Home}
-                            name="Kunci Rumah"
-                            description="Pembuatan dan perbaikan kunci rumah"
-                            priceStart={50000}
-                            estimatedTime="15 menit"
-                            category="rumah"
-                        />
-                        <ServiceCard
-                            icon={Key}
-                            name="Kunci Patah"
-                            description="Ekstraksi kunci patah tanpa merusak"
-                            priceStart={50000}
-                            estimatedTime="15 menit"
-                            category="motor"
-                        />
+                        {services && services.length > 0 ? (
+                            services.map((service) => (
+                                <ServiceCard
+                                    key={service.id}
+                                    icon={getServiceIcon(service)}
+                                    name={service.title}
+                                    description={service.description}
+                                    priceStart={service.price}
+                                    estimatedTime={service.estimated_time || '15 menit'}
+                                    category={service.category}
+                                />
+                            ))
+                        ) : (
+                            // Fallback if no services in DB
+                            <>
+                                <ServiceCard
+                                    icon={Bike}
+                                    name="Duplikat Kunci Motor"
+                                    description="Pembuatan kunci motor duplikat semua merk"
+                                    priceStart={25000}
+                                    estimatedTime="10 menit"
+                                    category="motor"
+                                />
+                                <ServiceCard
+                                    icon={Car}
+                                    name="Duplikat Kunci Mobil"
+                                    description="Duplikat kunci mobil dengan teknologi terkini"
+                                    priceStart={75000}
+                                    estimatedTime="20 menit"
+                                    category="mobil"
+                                />
+                            </>
+                        )}
                     </div>
 
                     <div className="text-center mt-8">
@@ -244,3 +274,4 @@ export default function HomePage() {
         </div>
     )
 }
+

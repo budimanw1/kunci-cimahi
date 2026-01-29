@@ -14,12 +14,12 @@ export interface Booking {
 
 export interface Service {
     id: string
-    name: string
+    title: string
     description: string
-    price_start: number
+    price: number
     estimated_time: string
+    category: 'motor' | 'mobil' | 'rumah' | 'lainnya'
     icon: string
-    category: 'motor' | 'mobil' | 'rumah'
     created_at: string
 }
 

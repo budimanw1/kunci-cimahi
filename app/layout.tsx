@@ -1,9 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { Navbar } from '@/components/navbar'
-import { Footer } from '@/components/footer'
-import { WhatsAppButton } from '@/components/whatsapp-button'
 import { generateMetadata, generateLocalBusinessSchema } from '@/lib/metadata'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -34,10 +31,7 @@ export default function RootLayout({
                 />
             </head>
             <body className={inter.className}>
-                <Navbar />
-                <main className="min-h-screen">{children}</main>
-                <Footer />
-                <WhatsAppButton />
+                {children}
             </body>
         </html>
     )
