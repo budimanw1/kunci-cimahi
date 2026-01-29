@@ -8,7 +8,7 @@ export function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl
 
     // Protect admin routes
-    if (pathname.startsWith('/admin')) {
+    if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
         // Check for auth cookie/token
         const authToken = request.cookies.get('sb-access-token')
 
