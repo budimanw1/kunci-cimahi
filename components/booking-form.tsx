@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { supabase } from '@/lib/supabase'
@@ -137,16 +137,20 @@ export function BookingForm() {
                     <div className="space-y-2">
                         <Label htmlFor="vehicle_type">Jenis Kendaraan/Kunci *</Label>
                         <Select
-                            id="vehicle_type"
-                            name="vehicle_type"
                             value={formData.vehicle_type}
-                            onChange={handleChange}
-                            required
+                            onValueChange={(value) =>
+                                setFormData({ ...formData, vehicle_type: value as any })
+                            }
                         >
-                            <option value="motor">Motor</option>
-                            <option value="mobil">Mobil</option>
-                            <option value="rumah">Rumah</option>
-                            <option value="lainnya">Lainnya</option>
+                            <SelectTrigger id="vehicle_type">
+                                <SelectValue placeholder="Pilih jenis kendaraan" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="motor">Motor</SelectItem>
+                                <SelectItem value="mobil">Mobil</SelectItem>
+                                <SelectItem value="rumah">Rumah</SelectItem>
+                                <SelectItem value="lainnya">Lainnya</SelectItem>
+                            </SelectContent>
                         </Select>
                     </div>
 
