@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { supabase } from '@/lib/supabase'
 import { formatCurrency } from '@/lib/utils'
 import { Booking, DashboardStats } from '@/lib/types'
-import { Calendar, DollarSign, Clock, CheckCircle, Loader2, Trash2, Edit2, Save, X } from 'lucide-react'
+import { Calendar, DollarSign, Clock, CheckCircle, Loader2, Trash2, Edit2, Save, X, Bell } from 'lucide-react'
 import { DatePickerWithRange } from '@/components/date-range-picker'
 import { DateRange } from 'react-day-picker'
 import { addDays, startOfDay, endOfDay, subDays, subMonths } from 'date-fns'
@@ -36,6 +36,8 @@ export default function AdminDashboardPage() {
     const [editingId, setEditingId] = useState<string | null>(null)
     const [editPrice, setEditPrice] = useState<string>('')
 
+    const [realtimeStatus, setRealtimeStatus] = useState<'CONNECTING' | 'SUBSCRIBED' | 'CHANNEL_ERROR' | 'CLOSED'>('CONNECTING')
+
     useEffect(() => {
         checkUser()
         // Request notification permission
@@ -43,6 +45,30 @@ export default function AdminDashboardPage() {
             Notification.requestPermission()
         }
     }, [])
+
+    const handleTestNotification = () => {
+        if (!('Notification' in window)) {
+            alert('Browser Anda tidak mendukung notifikasi.')
+            return
+        }
+
+        if (Notification.permission === 'granted') {
+            new Notification('Tes Notifikasi Berhasil!', {
+                body: 'Sistem notifikasi browser Anda berfungsi dengan baik.',
+                icon: '/favicon.ico'
+            })
+            const audio = new Audio('/notification.mp3')
+            audio.play().catch(e => console.log('Audio play failed', e))
+        } else if (Notification.permission !== 'denied') {
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    new Notification('Tes Notifikasi Berhasil!')
+                }
+            })
+        } else {
+            alert('Izin notifikasi diblokir. Silakan reset izin di ikon gembok URL browser.')
+        }
+    }
 
     useEffect(() => {
         fetchBookings()
@@ -68,6 +94,7 @@ export default function AdminDashboardPage() {
             })
             .subscribe((status) => {
                 console.log('Realtime Status:', status)
+                setRealtimeStatus(status)
             })
 
         return () => {
@@ -255,6 +282,17 @@ export default function AdminDashboardPage() {
                         <p className="text-muted-foreground">Kelola pesanan dan statistik bisnis</p>
                     </div>
                     <div className="flex items-center gap-4">
+                        {/* Realtime Status Indicator */}
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-full border text-xs font-medium shadow-sm">
+                            <div className={`w-2 h-2 rounded-full ${realtimeStatus === 'SUBSCRIBED' ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+                            {realtimeStatus === 'SUBSCRIBED' ? 'Live Updates On' : 'Connecting...'}
+                        </div>
+
+                        <Button variant="outline" size="sm" onClick={handleTestNotification}>
+                            <Bell className="w-4 h-4 mr-2" />
+                            Tes Notif
+                        </Button>
+
                         <DatePickerWithRange date={dateRange} setDate={setDateRange} />
                         <Button variant="outline" onClick={handleLogout}>
                             Logout
