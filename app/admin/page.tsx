@@ -1,267 +1,264 @@
-'use client'
+import { Calendar, DollarSign, Clock, CheckCircle, Loader2, Trash2, Edit2, Save, X, Bell, Phone, LogOut, RefreshCw } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Select } from '@/components/ui/select'
-import { Input } from '@/components/ui/input'
-import { supabase } from '@/lib/supabase'
-import { formatCurrency } from '@/lib/utils'
-import { Booking, DashboardStats } from '@/lib/types'
-import { Calendar, DollarSign, Clock, CheckCircle, Loader2, Trash2, Edit2, Save, X, Bell, Phone } from 'lucide-react'
-import { DatePickerWithRange } from '@/components/date-range-picker'
-import { DateRange } from 'react-day-picker'
-import { addDays, startOfDay, endOfDay, subDays, subMonths } from 'date-fns'
+// ...
 
-export default function AdminDashboardPage() {
-    const router = useRouter()
-    const [bookings, setBookings] = useState<Booking[]>([])
-    const [stats, setStats] = useState<DashboardStats>({
-        total_bookings: 0,
-        pending_bookings: 0,
-        completed_today: 0,
-        revenue_today: 0,
-        revenue_week: 0,
-        revenue_month: 0,
-    })
-    const [loading, setLoading] = useState(true)
-    const [dateRange, setDateRange] = useState<DateRange | undefined>({
-        from: subDays(new Date(), 90),
-        to: new Date(),
-    })
+// Inside render:
 
-    // Edit state
-    const [editingId, setEditingId] = useState<string | null>(null)
-    const [editPrice, setEditPrice] = useState<string>('')
+<Tabs defaultValue="bookings" className="space-y-6">
+    <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+        <TabsTrigger value="bookings">Pesanan</TabsTrigger>
+        <TabsTrigger value="services">Kelola Layanan</TabsTrigger>
+    </TabsList>
 
-    const [realtimeStatus, setRealtimeStatus] = useState<'CONNECTING' | 'SUBSCRIBED' | 'CHANNEL_ERROR' | 'CLOSED'>('CONNECTING')
+// ...
 
-    useEffect(() => {
-        checkUser()
-        // Request notification permission
-        if ('Notification' in window) {
-            Notification.requestPermission()
-        }
-    }, [])
+    <div className="flex-1">
+        <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Status</div>
+        <select
+            value={booking.status}
+            onChange={(e) => updateBookingStatus(booking.id, e.target.value as Booking['status'])}
+            className="text-xs h-9 w-full bg-white shadow-sm border rounded-md px-2"
+        >
+            <option value="pending">⏳ Menunggu</option>
+            <option value="on_the_way">🚀 Perjalanan</option>
+            <option value="completed">✅ Selesai</option>
+        </select>
+    </div>
 
-    const handleTestNotification = () => {
-        if (!('Notification' in window)) {
-            alert('Browser Anda tidak mendukung notifikasi.')
-            return
-        }
+// ...
 
-        if (Notification.permission === 'granted') {
-            new Notification('Tes Notifikasi Berhasil!', {
-                body: 'Sistem notifikasi browser Anda berfungsi dengan baik.',
-                icon: '/favicon.ico'
-            })
-            const audio = new Audio('/notification.mp3')
-            audio.play().catch(e => console.log('Audio play failed', e))
-        } else if (Notification.permission !== 'denied') {
-            Notification.requestPermission().then(permission => {
-                if (permission === 'granted') {
-                    new Notification('Tes Notifikasi Berhasil!')
-                }
-            })
-        } else {
-            alert('Izin notifikasi diblokir. Silakan reset izin di ikon gembok URL browser.')
-        }
+    <TabsContent value="bookings" className="space-y-6">
+        {/* Content for bookings... copied from previous state but wrapped in TabsContent */}
+        {/* ... */}
+    </TabsContent>
+
+    <TabsContent value="services">
+        <Card>
+            <CardContent className="p-6">
+                <ServiceManager />
+            </CardContent>
+        </Card>
+    </TabsContent>
+</Tabs>
+            </div >
+        </div >
+    )
+}
+
+const router = useRouter()
+const [bookings, setBookings] = useState<Booking[]>([])
+const [stats, setStats] = useState<DashboardStats>({
+    total_bookings: 0,
+    pending_bookings: 0,
+    completed_today: 0,
+    revenue_today: 0,
+    revenue_week: 0,
+    revenue_month: 0,
+})
+const [loading, setLoading] = useState(true)
+const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: subDays(new Date(), 90),
+    to: new Date(),
+})
+
+// Edit state
+const [editingId, setEditingId] = useState<string | null>(null)
+const [editPrice, setEditPrice] = useState<string>('')
+
+const [realtimeStatus, setRealtimeStatus] = useState<'CONNECTING' | 'SUBSCRIBED' | 'CHANNEL_ERROR' | 'CLOSED'>('CONNECTING')
+
+useEffect(() => {
+    checkUser()
+    // Request notification permission
+    if ('Notification' in window) {
+        Notification.requestPermission()
+    }
+}, [])
+
+const handleTestNotification = () => {
+    if (!('Notification' in window)) {
+        alert('Browser Anda tidak mendukung notifikasi.')
+        return
     }
 
-    useEffect(() => {
-        fetchBookings()
-        fetchStats()
-
-        // Subscribe to real-time updates
-        const subscription = supabase
-            .channel('bookings')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, (payload) => {
-                fetchBookings()
-                fetchStats()
-
-                // Show notification for new bookings
-                if (payload.eventType === 'INSERT' && Notification.permission === 'granted') {
-                    const newBooking = payload.new as Booking
-                    new Notification('Pesanan Baru Masuk!', {
-                        body: `${newBooking.customer_name} - ${newBooking.problem_type}`,
-                        icon: '/favicon.ico'
-                    })
-                    // Play a subtle sound
-                    const audio = new Audio('/notification.mp3') // Placeholder, browser default beep might suffice or need file
-                }
-            })
-            .subscribe((status) => {
-                console.log('Realtime Status:', status)
-                setRealtimeStatus(status as any)
-            })
-
-        return () => {
-            subscription.unsubscribe()
-        }
-    }, [dateRange]) // Refetch when date range changes
-
-    const checkUser = async () => {
-        const { data: { session } } = await supabase.auth.getSession()
-        if (!session) {
-            router.push('/admin/login')
-        }
-    }
-
-    // ... (keep fetchBookings and others same)
-
-
-
-    const fetchBookings = async () => {
-        try {
-            let query = supabase
-                .from('bookings')
-                .select('*')
-                .order('created_at', { ascending: false })
-
-            if (dateRange?.from) {
-                query = query.gte('created_at', startOfDay(dateRange.from).toISOString())
+    if (Notification.permission === 'granted') {
+        new Notification('Tes Notifikasi Berhasil!', {
+            body: 'Sistem notifikasi browser Anda berfungsi dengan baik.',
+            icon: '/favicon.ico'
+        })
+        const audio = new Audio('/notification.mp3')
+        audio.play().catch(e => console.log('Audio play failed', e))
+    } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                new Notification('Tes Notifikasi Berhasil!')
             }
-            if (dateRange?.to) {
-                query = query.lte('created_at', endOfDay(dateRange.to).toISOString())
+        })
+    } else {
+        alert('Izin notifikasi diblokir. Silakan reset izin di ikon gembok URL browser.')
+    }
+}
+
+useEffect(() => {
+    fetchBookings()
+    fetchStats()
+
+    // Subscribe to real-time updates
+    const subscription = supabase
+        .channel('bookings')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, (payload) => {
+            fetchBookings()
+            fetchStats()
+
+            // Show notification for new bookings
+            if (payload.eventType === 'INSERT' && Notification.permission === 'granted') {
+                const newBooking = payload.new as Booking
+                new Notification('Pesanan Baru Masuk!', {
+                    body: `${newBooking.customer_name} - ${newBooking.problem_type}`,
+                    icon: '/favicon.ico'
+                })
+                // Play a subtle sound
+                const audio = new Audio('/notification.mp3') // Placeholder, browser default beep might suffice or need file
             }
+        })
+        .subscribe((status) => {
+            console.log('Realtime Status:', status)
+            setRealtimeStatus(status as any)
+        })
 
-            const { data, error } = await query
+    return () => {
+        subscription.unsubscribe()
+    }
+}, [dateRange]) // Refetch when date range changes
 
-            if (error) throw error
-            setBookings(data || [])
-        } catch (error) {
-            console.error('Error fetching bookings:', error)
-        } finally {
-            setLoading(false)
+const checkUser = async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+        router.push('/admin/login')
+    }
+}
+
+// ... (keep fetchBookings and others same)
+
+
+
+const fetchBookings = async () => {
+    try {
+        let query = supabase
+            .from('bookings')
+            .select('*')
+            .order('created_at', { ascending: false })
+
+        if (dateRange?.from) {
+            query = query.gte('created_at', startOfDay(dateRange.from).toISOString())
         }
-    }
-
-    const fetchStats = async () => {
-        try {
-            const { data: allBookings, error } = await supabase
-                .from('bookings')
-                .select('*')
-
-            if (error) throw error
-
-            const now = new Date()
-            const todayStart = startOfDay(now)
-            const weekAgo = subDays(now, 7)
-            const monthAgo = subMonths(now, 1)
-
-            const completedToday = allBookings?.filter(
-                (b) => b.status === 'completed' && new Date(b.created_at) >= todayStart
-            ).length || 0
-
-            // Helper to calculate revenue based on price field or default
-            const calculateRevenue = (bookings: any[]) => {
-                return bookings.reduce((sum, b) => sum + (b.price || (b.status === 'completed' ? 50000 : 0)), 0)
-            }
-
-            setStats({
-                total_bookings: allBookings?.length || 0,
-                pending_bookings: allBookings?.filter((b) => b.status === 'pending').length || 0,
-                completed_today: completedToday,
-                revenue_today: calculateRevenue(allBookings?.filter((b) => b.status === 'completed' && new Date(b.created_at) >= todayStart) || []),
-                revenue_week: calculateRevenue(allBookings?.filter((b) => b.status === 'completed' && new Date(b.created_at) >= weekAgo) || []),
-                revenue_month: calculateRevenue(allBookings?.filter((b) => b.status === 'completed' && new Date(b.created_at) >= monthAgo) || []),
-            })
-        } catch (error) {
-            console.error('Error fetching stats:', error)
+        if (dateRange?.to) {
+            query = query.lte('created_at', endOfDay(dateRange.to).toISOString())
         }
+
+        const { data, error } = await query
+
+        if (error) throw error
+        setBookings(data || [])
+    } catch (error) {
+        console.error('Error fetching bookings:', error)
+    } finally {
+        setLoading(false)
     }
+}
 
-    const updateBookingStatus = async (id: string, status: Booking['status']) => {
-        try {
-            const { error } = await supabase
-                .from('bookings')
-                .update({ status, updated_at: new Date().toISOString() })
-                .eq('id', id)
+const fetchStats = async () => {
+    try {
+        const { data: allBookings, error } = await supabase
+            .from('bookings')
+            .select('*')
 
-            if (error) throw error
-            // Realtime subscription will handle refresh
-        } catch (error) {
-            console.error('Error updating booking:', error)
-            alert('Gagal mengupdate status')
+        if (error) throw error
+
+        const now = new Date()
+        const todayStart = startOfDay(now)
+        const weekAgo = subDays(now, 7)
+        const monthAgo = subMonths(now, 1)
+
+        const completedToday = allBookings?.filter(
+            (b) => b.status === 'completed' && new Date(b.created_at) >= todayStart
+        ).length || 0
+
+        // Helper to calculate revenue based on price field or default
+        const calculateRevenue = (bookings: any[]) => {
+            return bookings.reduce((sum, b) => sum + (b.price || (b.status === 'completed' ? 50000 : 0)), 0)
         }
+
+        setStats({
+            total_bookings: allBookings?.length || 0,
+            pending_bookings: allBookings?.filter((b) => b.status === 'pending').length || 0,
+            completed_today: completedToday,
+            revenue_today: calculateRevenue(allBookings?.filter((b) => b.status === 'completed' && new Date(b.created_at) >= todayStart) || []),
+            revenue_week: calculateRevenue(allBookings?.filter((b) => b.status === 'completed' && new Date(b.created_at) >= weekAgo) || []),
+            revenue_month: calculateRevenue(allBookings?.filter((b) => b.status === 'completed' && new Date(b.created_at) >= monthAgo) || []),
+        })
+    } catch (error) {
+        console.error('Error fetching stats:', error)
     }
+}
 
-    const startEditing = (booking: Booking) => {
-        setEditingId(booking.id)
-        setEditPrice((booking.price || 0).toString())
+const updateBookingStatus = async (id: string, status: Booking['status']) => {
+    try {
+        const { error } = await supabase
+            .from('bookings')
+            .update({ status, updated_at: new Date().toISOString() })
+            .eq('id', id)
+
+        if (error) throw error
+        // Realtime subscription will handle refresh
+    } catch (error) {
+        console.error('Error updating booking:', error)
+        alert('Gagal mengupdate status')
     }
+}
 
-    const savePrice = async (id: string) => {
-        try {
-            const price = parseFloat(editPrice)
-            if (isNaN(price)) return
+const startEditing = (booking: Booking) => {
+    setEditingId(booking.id)
+    setEditPrice((booking.price || 0).toString())
+}
 
-            const { error } = await supabase
-                .from('bookings')
-                .update({ price, updated_at: new Date().toISOString() })
-                .eq('id', id)
+const savePrice = async (id: string) => {
+    try {
+        const price = parseFloat(editPrice)
+        if (isNaN(price)) return
 
-            if (error) throw error
-            setEditingId(null)
-            // Realtime subscription will handle refresh
-        } catch (error) {
-            console.error('Error updating price:', error)
-            alert('Gagal mengupdate harga')
-        }
-    }
+        const { error } = await supabase
+            .from('bookings')
+            .update({ price, updated_at: new Date().toISOString() })
+            .eq('id', id)
 
-    const cancelEditing = () => {
+        if (error) throw error
         setEditingId(null)
-        setEditPrice('')
+        // Realtime subscription will handle refresh
+    } catch (error) {
+        console.error('Error updating price:', error)
+        alert('Gagal mengupdate harga')
     }
+}
 
-    const deleteBooking = async (id: string) => {
-        if (!confirm('Apakah Anda yakin ingin menghapus booking ini? Data tidak dapat dikembalikan.')) return
+const cancelEditing = () => {
+    setEditingId(null)
+    setEditPrice('')
+}
 
-        try {
-            const { error } = await supabase
-                .from('bookings')
-                .delete()
-                .eq('id', id)
+const deleteBooking = async (id: string) => {
+    if (!confirm('Apakah Anda yakin ingin menghapus booking ini? Data tidak dapat dikembalikan.')) return
 
-            if (error) throw error
-            // Realtime subscription will handle refresh
-        } catch (error) {
-            console.error('Error deleting booking:', error)
-            alert('Gagal menghapus booking')
-        }
-    }
+    try {
+        const { error } = await supabase
+            .from('bookings')
+            .delete()
+            .eq('id', id)
 
-    const getStatusBadgeVariant = (status: Booking['status']) => {
-        switch (status) {
-            case 'pending':
-                return 'pending'
-            case 'on_the_way':
-                return 'on_the_way'
-            case 'completed':
-                return 'completed'
-            default:
-                return 'default'
-        }
-    }
-
-    const getStatusLabel = (status: Booking['status']) => {
-        switch (status) {
-            case 'pending':
-                return 'Menunggu'
-            case 'on_the_way':
-                return 'Perjalanan'
-            case 'completed':
-                return 'Selesai'
-            default:
-                return status
-        }
-    }
-
-    const handleLogout = async () => {
-        await supabase.auth.signOut()
+        if (error) throw error
+        // Realtime subscription will handle refresh
+    } catch (error) {
         router.push('/admin/login')
     }
 
