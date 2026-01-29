@@ -1,16 +1,22 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Select } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
 import { supabase } from '@/lib/supabase'
 import { formatCurrency } from '@/lib/utils'
 import { Booking, DashboardStats } from '@/lib/types'
-import { Calendar, DollarSign, Clock, CheckCircle, Loader2 } from 'lucide-react'
+import { Calendar, DollarSign, Clock, CheckCircle, Loader2, Trash2, Edit2, Save, X } from 'lucide-react'
+import { DatePickerWithRange } from '@/components/date-range-picker'
+import { DateRange } from 'react-day-picker'
+import { addDays, startOfDay, endOfDay, subDays, subMonths } from 'date-fns'
 
 export default function AdminDashboardPage() {
+    const router = useRouter()
     const [bookings, setBookings] = useState<Booking[]>([])
     const [stats, setStats] = useState<DashboardStats>({
         total_bookings: 0,
@@ -21,6 +27,18 @@ export default function AdminDashboardPage() {
         revenue_month: 0,
     })
     const [loading, setLoading] = useState(true)
+    const [dateRange, setDateRange] = useState<DateRange | undefined>({
+        from: subDays(new Date(), 30),
+        to: new Date(),
+    })
+
+    // Edit state
+    const [editingId, setEditingId] = useState<string | null>(null)
+    const [editPrice, setEditPrice] = useState<string>('')
+
+    useEffect(() => {
+        checkUser()
+    }, [])
 
     useEffect(() => {
         fetchBookings()
@@ -38,15 +56,30 @@ export default function AdminDashboardPage() {
         return () => {
             subscription.unsubscribe()
         }
-    }, [])
+    }, [dateRange]) // Refetch when date range changes
+
+    const checkUser = async () => {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session) {
+            router.push('/admin/login')
+        }
+    }
 
     const fetchBookings = async () => {
         try {
-            const { data, error } = await supabase
+            let query = supabase
                 .from('bookings')
                 .select('*')
                 .order('created_at', { ascending: false })
-                .limit(50)
+
+            if (dateRange?.from) {
+                query = query.gte('created_at', startOfDay(dateRange.from).toISOString())
+            }
+            if (dateRange?.to) {
+                query = query.lte('created_at', endOfDay(dateRange.to).toISOString())
+            }
+
+            const { data, error } = await query
 
             if (error) throw error
             setBookings(data || [])
@@ -66,21 +99,26 @@ export default function AdminDashboardPage() {
             if (error) throw error
 
             const now = new Date()
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-            const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000)
-            const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000)
+            const todayStart = startOfDay(now)
+            const weekAgo = subDays(now, 7)
+            const monthAgo = subMonths(now, 1)
 
             const completedToday = allBookings?.filter(
-                (b) => b.status === 'completed' && new Date(b.created_at) >= today
+                (b) => b.status === 'completed' && new Date(b.created_at) >= todayStart
             ).length || 0
+
+            // Helper to calculate revenue based on price field or default
+            const calculateRevenue = (bookings: any[]) => {
+                return bookings.reduce((sum, b) => sum + (b.price || (b.status === 'completed' ? 50000 : 0)), 0)
+            }
 
             setStats({
                 total_bookings: allBookings?.length || 0,
                 pending_bookings: allBookings?.filter((b) => b.status === 'pending').length || 0,
                 completed_today: completedToday,
-                revenue_today: completedToday * 50000, // Estimated average
-                revenue_week: (allBookings?.filter((b) => new Date(b.created_at) >= weekAgo && b.status === 'completed').length || 0) * 50000,
-                revenue_month: (allBookings?.filter((b) => new Date(b.created_at) >= monthAgo && b.status === 'completed').length || 0) * 50000,
+                revenue_today: calculateRevenue(allBookings?.filter((b) => b.status === 'completed' && new Date(b.created_at) >= todayStart) || []),
+                revenue_week: calculateRevenue(allBookings?.filter((b) => b.status === 'completed' && new Date(b.created_at) >= weekAgo) || []),
+                revenue_month: calculateRevenue(allBookings?.filter((b) => b.status === 'completed' && new Date(b.created_at) >= monthAgo) || []),
             })
         } catch (error) {
             console.error('Error fetching stats:', error)
@@ -95,11 +133,56 @@ export default function AdminDashboardPage() {
                 .eq('id', id)
 
             if (error) throw error
-            fetchBookings()
-            fetchStats()
+            // Realtime subscription will handle refresh
         } catch (error) {
             console.error('Error updating booking:', error)
             alert('Gagal mengupdate status')
+        }
+    }
+
+    const startEditing = (booking: Booking) => {
+        setEditingId(booking.id)
+        setEditPrice((booking.price || 0).toString())
+    }
+
+    const savePrice = async (id: string) => {
+        try {
+            const price = parseFloat(editPrice)
+            if (isNaN(price)) return
+
+            const { error } = await supabase
+                .from('bookings')
+                .update({ price, updated_at: new Date().toISOString() })
+                .eq('id', id)
+
+            if (error) throw error
+            setEditingId(null)
+            // Realtime subscription will handle refresh
+        } catch (error) {
+            console.error('Error updating price:', error)
+            alert('Gagal mengupdate harga')
+        }
+    }
+
+    const cancelEditing = () => {
+        setEditingId(null)
+        setEditPrice('')
+    }
+
+    const deleteBooking = async (id: string) => {
+        if (!confirm('Apakah Anda yakin ingin menghapus booking ini? Data tidak dapat dikembalikan.')) return
+
+        try {
+            const { error } = await supabase
+                .from('bookings')
+                .delete()
+                .eq('id', id)
+
+            if (error) throw error
+            // Realtime subscription will handle refresh
+        } catch (error) {
+            console.error('Error deleting booking:', error)
+            alert('Gagal menghapus booking')
         }
     }
 
@@ -129,6 +212,11 @@ export default function AdminDashboardPage() {
         }
     }
 
+    const handleLogout = async () => {
+        await supabase.auth.signOut()
+        router.push('/admin/login')
+    }
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -138,11 +226,19 @@ export default function AdminDashboardPage() {
     }
 
     return (
-        <div className="py-8">
+        <div className="py-8 bg-gray-50 min-h-screen">
             <div className="container mx-auto px-4">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold mb-2">Dashboard Admin</h1>
-                    <p className="text-muted-foreground">Kelola pesanan dan lihat statistik layanan</p>
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold mb-2">Dashboard Admin</h1>
+                        <p className="text-muted-foreground">Kelola pesanan dan statistik bisnis</p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                        <DatePickerWithRange date={dateRange} setDate={setDateRange} />
+                        <Button variant="outline" onClick={handleLogout}>
+                            Logout
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Stats Cards */}
@@ -187,13 +283,13 @@ export default function AdminDashboardPage() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{formatCurrency(stats.revenue_month)}</div>
-                            <p className="text-xs text-muted-foreground">Estimasi</p>
+                            <p className="text-xs text-muted-foreground">Total Pemasukan</p>
                         </CardContent>
                     </Card>
                 </div>
 
                 {/* Bookings Table */}
-                <Card>
+                <Card className="overflow-hidden">
                     <CardHeader>
                         <CardTitle>Daftar Booking</CardTitle>
                     </CardHeader>
@@ -201,46 +297,88 @@ export default function AdminDashboardPage() {
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead>
-                                    <tr className="border-b">
-                                        <th className="text-left py-3 px-4 font-semibold text-sm">Tiket ID</th>
-                                        <th className="text-left py-3 px-4 font-semibold text-sm">Nama</th>
-                                        <th className="text-left py-3 px-4 font-semibold text-sm">Telepon</th>
-                                        <th className="text-left py-3 px-4 font-semibold text-sm">Lokasi</th>
-                                        <th className="text-left py-3 px-4 font-semibold text-sm">Masalah</th>
+                                    <tr className="border-b bg-muted/50">
+                                        <th className="text-left py-3 px-4 font-semibold text-sm">Tiket & Waktu</th>
+                                        <th className="text-left py-3 px-4 font-semibold text-sm">Pelanggan</th>
+                                        <th className="text-left py-3 px-4 font-semibold text-sm">Lokasi & Masalah</th>
                                         <th className="text-left py-3 px-4 font-semibold text-sm">Status</th>
+                                        <th className="text-left py-3 px-4 font-semibold text-sm">Harga</th>
                                         <th className="text-left py-3 px-4 font-semibold text-sm">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {bookings.length === 0 ? (
                                         <tr>
-                                            <td colSpan={7} className="text-center py-8 text-muted-foreground">
-                                                Belum ada booking
+                                            <td colSpan={6} className="text-center py-8 text-muted-foreground">
+                                                Tidak ada booking pada periode ini
                                             </td>
                                         </tr>
                                     ) : (
                                         bookings.map((booking) => (
-                                            <tr key={booking.id} className="border-b hover:bg-gray-50">
-                                                <td className="py-3 px-4 font-mono text-sm">{booking.ticket_id}</td>
-                                                <td className="py-3 px-4">{booking.customer_name}</td>
-                                                <td className="py-3 px-4">{booking.phone_number}</td>
-                                                <td className="py-3 px-4 max-w-xs truncate">{booking.location}</td>
-                                                <td className="py-3 px-4 max-w-xs truncate">{booking.problem_type}</td>
+                                            <tr key={booking.id} className="border-b hover:bg-white/50 transition-colors">
                                                 <td className="py-3 px-4">
-                                                    <Badge variant={getStatusBadgeVariant(booking.status)}>
-                                                        {getStatusLabel(booking.status)}
-                                                    </Badge>
+                                                    <div className="font-mono text-sm font-bold">{booking.ticket_id}</div>
+                                                    <div className="text-xs text-muted-foreground">
+                                                        {new Date(booking.created_at).toLocaleString('id-ID', {
+                                                            day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
+                                                        })}
+                                                    </div>
+                                                </td>
+                                                <td className="py-3 px-4">
+                                                    <div className="font-medium">{booking.customer_name}</div>
+                                                    <div className="text-sm text-muted-foreground">{booking.phone_number}</div>
+                                                </td>
+                                                <td className="py-3 px-4 max-w-xs">
+                                                    <div className="truncate font-medium" title={booking.location}>{booking.location}</div>
+                                                    <div className="truncate text-sm text-muted-foreground" title={booking.problem_type}>{booking.problem_type}</div>
                                                 </td>
                                                 <td className="py-3 px-4">
                                                     <Select
                                                         value={booking.status}
                                                         onChange={(e) => updateBookingStatus(booking.id, e.target.value as Booking['status'])}
-                                                        className="text-sm h-8"
+                                                        className="text-xs h-7 w-[110px]"
                                                     >
                                                         <option value="pending">Menunggu</option>
                                                         <option value="on_the_way">Perjalanan</option>
                                                         <option value="completed">Selesai</option>
                                                     </Select>
+                                                </td>
+                                                <td className="py-3 px-4 min-w-[140px]">
+                                                    {editingId === booking.id ? (
+                                                        <div className="flex items-center gap-1">
+                                                            <Input
+                                                                type="number"
+                                                                value={editPrice}
+                                                                onChange={(e) => setEditPrice(e.target.value)}
+                                                                className="h-8 w-24 text-right"
+                                                            />
+                                                            <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600" onClick={() => savePrice(booking.id)}>
+                                                                <Save className="h-4 w-4" />
+                                                            </Button>
+                                                            <Button size="icon" variant="ghost" className="h-8 w-8 text-red-600" onClick={cancelEditing}>
+                                                                <X className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex items-center justify-between gap-2">
+                                                            <span className="font-medium">
+                                                                {booking.price ? formatCurrency(booking.price) : '-'}
+                                                            </span>
+                                                            <Button size="icon" variant="ghost" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => startEditing(booking)}>
+                                                                <Edit2 className="h-3 w-3 text-muted-foreground" />
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                </td>
+                                                <td className="py-3 px-4">
+                                                    <Button
+                                                        size="icon"
+                                                        variant="ghost"
+                                                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                                        onClick={() => deleteBooking(booking.id)}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
                                                 </td>
                                             </tr>
                                         ))

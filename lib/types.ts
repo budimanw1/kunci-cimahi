@@ -7,6 +7,7 @@ export interface Booking {
     vehicle_type: 'motor' | 'mobil' | 'rumah' | 'lainnya'
     problem_type: string
     status: 'pending' | 'on_the_way' | 'completed'
+    price?: number
     created_at: string
     updated_at: string
 }
