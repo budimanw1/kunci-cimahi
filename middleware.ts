@@ -14,7 +14,8 @@ export function middleware(request: NextRequest) {
 
         if (!authToken) {
             // Redirect to login page
-            return NextResponse.redirect(new URL('/admin/login', request.url))
+            // return NextResponse.redirect(new URL('/admin/login', request.url))
+            console.log('Middleware: No token found, but allowing proceed for client-side check')
         }
     }
 
