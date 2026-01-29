@@ -5,7 +5,7 @@ export function Footer() {
     return (
         <footer className="bg-gray-900 text-gray-300">
             <div className="container mx-auto px-4 py-12">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
                     {/* Brand */}
                     <div>
                         <div className="flex items-center gap-2 mb-4">
@@ -59,6 +59,21 @@ export function Footer() {
                             <li>Kunci Hilang</li>
                             <li>Kunci Patah</li>
                             <li>Kunci Terkunci</li>
+                        </ul>
+                    </div>
+
+                    {/* Area Layanan */}
+                    <div>
+                        <h3 className="font-semibold text-white mb-4">Area Layanan</h3>
+                        <ul className="space-y-2 text-sm text-gray-400">
+                            <li>Leuwigajah</li>
+                            <li>Cibeber</li>
+                            <li>Utama</li>
+                            <li>Baros</li>
+                            <li>Melong</li>
+                            <li>Cimahi Selatan</li>
+                            <li>Margaasih</li>
+                            <li>Cimindi</li>
                         </ul>
                     </div>
 

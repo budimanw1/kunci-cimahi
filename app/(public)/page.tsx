@@ -4,7 +4,32 @@ import { ServiceCard } from '@/components/service-card'
 import { TestimonialCarousel } from '@/components/testimonial-carousel'
 import { Key, Clock, MapPin, Phone, Wrench, Home, Car, Bike, Lock, Shield } from 'lucide-react'
 import { Testimonial, Service } from '@/lib/types'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { generateFAQSchema } from '@/lib/metadata'
 import { supabase } from '@/lib/supabase'
+
+const faqs = [
+    {
+        question: 'Apakah layanan ini buka 24 jam?',
+        answer: 'Ya, kami melayani panggilan darurat 24 jam setiap hari, termasuk hari libur dan tanggal merah untuk area Cimahi Selatan dan sekitarnya.',
+    },
+    {
+        question: 'Berapa lama teknisi akan sampai ke lokasi?',
+        answer: 'Untuk area Leuwigajah dan Cimahi Selatan, teknisi kami biasanya tiba dalam waktu 15-30 menit tergantung kondisi lalu lintas.',
+    },
+    {
+        question: 'Apakah bisa membuka kunci mobil tanpa merusak?',
+        answer: 'Tentu saja. Teknisi kami menggunakan peralatan khusus (Lishi tools) untuk membuka pintu mobil yang terkunci tanpa merusak pintu atau sistem kunci kendaraan Anda.',
+    },
+    {
+        question: 'Berapa kisaran biaya untuk duplikat kunci?',
+        answer: 'Harga duplikat kunci motor mulai dari Rp 25.000, sedangkan mobil mulai dari Rp 75.000 (non-immobilizer). Untuk kunci immobilizer harga menyesuaikan jenis chip.',
+    },
+    {
+        question: 'Area mana saja yang dijangkau?',
+        answer: 'Fokus utama kami adalah Cimahi Selatan (Leuwigajah, Cibeber, Utama, Melong) namun kami juga melayani area Cimahi Tengah, Cimahi Utara, dan perbatasan Bandung Barat.',
+    },
+]
 
 // Mock testimonials - in production, fetch from Supabase
 const testimonials: Testimonial[] = [
@@ -253,6 +278,40 @@ export default async function HomePage() {
                     <TestimonialCarousel testimonials={testimonials} />
                 </div>
             </section>
+
+            {/* FAO Section */}
+            <section className="py-16 bg-gray-50">
+                <div className="container mx-auto px-4">
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl md:text-4xl font-bold mb-4">Pertanyaan Umum (FAQ)</h2>
+                        <p className="text-lg text-muted-foreground">
+                            Hal yang sering ditanyakan pelanggan kami
+                        </p>
+                    </div>
+
+                    <div className="max-w-3xl mx-auto">
+                        <Accordion type="single" collapsible className="w-full">
+                            {faqs.map((faq, index) => (
+                                <AccordionItem key={index} value={`item-${index}`}>
+                                    <AccordionTrigger className="text-left font-semibold">
+                                        {faq.question}
+                                    </AccordionTrigger>
+                                    <AccordionContent className="text-muted-foreground">
+                                        {faq.answer}
+                                    </AccordionContent>
+                                </AccordionItem>
+                            ))}
+                        </Accordion>
+                    </div>
+                </div>
+            </section>
+
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{
+                    __html: JSON.stringify(generateFAQSchema(faqs)),
+                }}
+            />
 
             {/* CTA Section */}
             <section className="py-16 bg-gradient-to-br from-blue-900 to-blue-800 text-white">
