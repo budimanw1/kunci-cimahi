@@ -2,10 +2,10 @@ import { Metadata } from 'next'
 
 const siteConfig = {
     name: 'KUNCI-CIMAHI',
-    description: 'Layanan Tukang Kunci 24/7 di Cimahi Selatan - Bundaran Leuwigajah. Duplikat kunci motor, mobil, rumah. Kunci hilang, patah, terkunci. Panggil sekarang!',
+    description: 'Layanan Tukang Kunci 24/7 di Cimahi Selatan - Jl. Mahar Martanegara. Duplikat kunci motor, mobil, rumah. Kunci hilang, patah, terkunci. Panggil sekarang!',
     url: process.env.NEXT_PUBLIC_SITE_URL || 'https://kunci-cimahi.vercel.app',
     businessName: 'KUNCI-CIMAHI',
-    address: 'Bundaran Leuwigajah, Cimahi Selatan, Kota Cimahi, Jawa Barat',
+    address: 'Jl. Mahar Martanegara No.218, Utama, Kec. Cimahi Sel., Kota Cimahi, Jawa Barat 40533',
     phone: process.env.NEXT_PUBLIC_BUSINESS_PHONE || '+62 xxx xxxx xxxx',
     whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '62xxxxxxxxxx',
 }
@@ -100,15 +100,15 @@ export function generateLocalBusinessSchema() {
         telephone: siteConfig.phone,
         address: {
             '@type': 'PostalAddress',
-            streetAddress: 'Bundaran Leuwigajah',
-            addressLocality: 'Cimahi Selatan',
+            streetAddress: 'Jl. Mahar Martanegara No.218',
+            addressLocality: 'Utama, Cimahi Selatan',
             addressRegion: 'Jawa Barat',
             addressCountry: 'ID',
         },
         geo: {
             '@type': 'GeoCoordinates',
-            latitude: -6.8926,
-            longitude: 107.5426,
+            latitude: -6.902888,
+            longitude: 107.535613,
         },
         openingHoursSpecification: {
             '@type': 'OpeningHoursSpecification',

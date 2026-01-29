@@ -67,7 +67,7 @@ export function generateCustomerWhatsAppMessage(ticketId: string, customerName: 
         `Terima kasih telah memesan layanan KUNCI-CIMAHI.\n\n` +
         `📋 Nomor Tiket Anda: *${ticketId}*\n\n` +
         `Teknisi kami akan segera menghubungi Anda. ⚡\n\n` +
-        `Layanan 24/7 - Bundaran Leuwigajah, Cimahi Selatan`
+        `Layanan 24/7 - Jl. Mahar Martanegara, Utama, Cimahi Selatan`
     )
 }
 // Target Areas for SEO

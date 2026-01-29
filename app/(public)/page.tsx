@@ -139,7 +139,7 @@ export default async function HomePage() {
 
                         <div className="flex items-center justify-center gap-2 text-sm">
                             <MapPin className="h-4 w-4 text-gold-400" />
-                            <span>Bundaran Leuwigajah, Cimahi Selatan</span>
+                            <span>Jl. Mahar Martanegara No.218, Utama, Cimahi Selatan</span>
                         </div>
                     </div>
                 </div>
@@ -173,7 +173,7 @@ export default async function HomePage() {
                             </div>
                             <h3 className="text-xl font-semibold mb-2">Lokasi Strategis</h3>
                             <p className="text-muted-foreground">
-                                Berlokasi di Bundaran Leuwigajah, mudah dijangkau
+                                Berlokasi di Jl. Mahar Martanegara, Utama, Cimahi Selatan
                             </p>
                         </div>
                     </div>
@@ -242,14 +242,14 @@ export default async function HomePage() {
                     <div className="text-center mb-12">
                         <h2 className="text-3xl md:text-4xl font-bold mb-4">Lokasi Kami</h2>
                         <p className="text-lg text-muted-foreground">
-                            Bundaran Leuwigajah, Cimahi Selatan
+                            Jl. Mahar Martanegara No.218, Utama, Cimahi Selatan
                         </p>
                     </div>
 
                     <div className="max-w-4xl mx-auto">
                         <div className="aspect-video rounded-lg overflow-hidden shadow-lg">
                             <iframe
-                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3960.7234567890123!2d107.5426!3d-6.8926!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwNTMnMzMuNCJTIDEwN8KwMzInMzMuNCJF!5e0!3m2!1sen!2sid!4v1234567890123"
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d540.2392891877454!2d107.5356125616693!3d-6.902887666887708!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e68e5d2e0679eed%3A0x360a44c9ee0eb336!2sJl.%20Mahar%20Martanegara%20No.218%2C%20Utama%2C%20Kec.%20Cimahi%20Sel.%2C%20Kota%20Cimahi%2C%20Jawa%20Barat%2040533!5e1!3m2!1sid!2sid!4v1769684946929!5m2!1sid!2sid"
                                 width="100%"
                                 height="100%"
                                 style={{ border: 0 }}
@@ -260,7 +260,7 @@ export default async function HomePage() {
                         </div>
                         <div className="text-center mt-6">
                             <a
-                                href="https://maps.google.com/?q=Bundaran+Leuwigajah+Cimahi"
+                                href="https://maps.app.goo.gl/qaLNzD3tJQsCq4xX7"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium"
