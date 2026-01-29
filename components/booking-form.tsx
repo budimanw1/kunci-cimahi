@@ -68,7 +68,7 @@ export function BookingForm() {
             window.open(`https://wa.me/${technicianNumber}?text=${technicianMessage}`, '_blank')
 
             // Redirect to success page with ticket ID
-            router.push(`/booking/success?ticket=${ticketId}`)
+            router.push(`/pesan/success?ticket=${ticketId}`)
         } catch (error) {
             console.error('Error creating booking:', error)
             alert(`Gagal membuat pesanan: ${(error as any).message || (error as any).details || 'Terjadi kesalahan tidak diketahui'}`)

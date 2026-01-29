@@ -91,15 +91,15 @@ export default async function HomePage() {
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-                            <Link href="/booking">
-                                <Button variant="gold" size="xl" className="w-full sm:w-auto shadow-lg hover:shadow-xl">
-                                    <Phone className="mr-2 h-5 w-5" />
-                                    Panggil Tukang Kunci Sekarang
+                            <Link href="/pesan">
+                                <Button size="lg" className="bg-gold-500 hover:bg-gold-600 text-black font-bold text-lg h-14 px-8 shadow-gold">
+                                    <Key className="mr-2 h-5 w-5" />
+                                    Pesan Sekarang
                                 </Button>
                             </Link>
-                            <Link href="/services">
-                                <Button variant="outline" size="xl" className="w-full sm:w-auto bg-white/10 backdrop-blur-sm border-white/30 hover:bg-white/20 text-white">
-                                    Lihat Layanan
+                            <Link href="/layanan">
+                                <Button variant="outline" size="xl" className="w-full sm:w-auto hover:bg-white/10">
+                                    Lihat Semua Layanan
                                 </Button>
                             </Link>
                         </div>

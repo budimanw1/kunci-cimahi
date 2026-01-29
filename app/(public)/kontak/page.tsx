@@ -8,7 +8,7 @@ import { ContactActionButtons } from '@/components/contact-action-buttons'
 export const metadata: Metadata = generateMetadata({
     title: 'Kontak',
     description: 'Hubungi KUNCI-CIMAHI untuk layanan tukang kunci 24/7 di Cimahi Selatan. WhatsApp, telepon, atau kunjungi kami di Bundaran Leuwigajah.',
-    path: '/contact',
+    path: '/kontak',
 })
 
 export default function ContactPage() {

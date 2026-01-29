@@ -5,7 +5,7 @@ import { BookingForm } from '@/components/booking-form'
 export const metadata: Metadata = generateMetadata({
     title: 'Booking',
     description: 'Pesan layanan tukang kunci KUNCI-CIMAHI sekarang. Isi formulir dan teknisi kami akan segera menghubungi Anda. Layanan 24/7.',
-    path: '/booking',
+    path: '/pesan',
 })
 
 export default function BookingPage() {

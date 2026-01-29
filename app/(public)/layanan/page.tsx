@@ -9,7 +9,7 @@ import { Service } from '@/lib/types'
 export const metadata: Metadata = generateMetadata({
     title: 'Layanan',
     description: 'Daftar lengkap layanan tukang kunci KUNCI-CIMAHI: duplikat kunci motor, mobil, rumah, kunci hilang, patah, terkunci. Harga terjangkau, layanan 24/7.',
-    path: '/services',
+    path: '/layanan',
 })
 
 const getServiceIcon = (service: Service) => {

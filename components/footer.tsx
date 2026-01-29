@@ -32,17 +32,17 @@ export function Footer() {
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/services" className="hover:text-gold-400 transition-colors">
+                                <Link href="/layanan" className="text-gray-400 hover:text-white transition-colors">
                                     Layanan
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/booking" className="hover:text-gold-400 transition-colors">
-                                    Booking
+                                <Link href="/pesan" className="text-gray-400 hover:text-white transition-colors">
+                                    Pesan
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/contact" className="hover:text-gold-400 transition-colors">
+                                <Link href="/kontak" className="text-gray-400 hover:text-white transition-colors">
                                     Kontak
                                 </Link>
                             </li>

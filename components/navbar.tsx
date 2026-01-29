@@ -9,9 +9,9 @@ import { Button } from '@/components/ui/button'
 
 const navigation = [
     { name: 'Beranda', href: '/' },
-    { name: 'Layanan', href: '/services' },
-    { name: 'Booking', href: '/booking' },
-    { name: 'Kontak', href: '/contact' },
+    { name: 'Layanan', href: '/layanan' },
+    { name: 'Booking', href: '/pesan' },
+    { name: 'Kontak', href: '/kontak' },
 ]
 
 export function Navbar() {
