@@ -82,18 +82,7 @@ export default function AdminDashboardPage() {
 
     // ... (keep fetchBookings and others same)
 
-    const getStatusLabel = (status: Booking['status']) => {
-        switch (status) {
-            case 'pending':
-                return 'Menunggu'
-            case 'on_the_way':
-                return 'Perjalanan'
-            case 'completed':
-                return 'Selesai'
-            default:
-                return status
-        }
-    }
+
 
     const fetchBookings = async () => {
         try {
