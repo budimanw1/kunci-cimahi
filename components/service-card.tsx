@@ -1,9 +1,9 @@
-'use client'
+
 
 import { LucideIcon } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { formatCurrency } from '@/lib/supabase'
+import { formatCurrency } from '@/lib/utils'
 import Link from 'next/link'
 
 interface ServiceCardProps {
