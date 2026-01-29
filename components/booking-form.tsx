@@ -71,7 +71,7 @@ export function BookingForm() {
             router.push(`/booking/success?ticket=${ticketId}`)
         } catch (error) {
             console.error('Error creating booking:', error)
-            alert('Terjadi kesalahan. Silakan coba lagi.')
+            alert(`Gagal membuat pesanan: ${error.message || error.details || 'Terjadi kesalahan tidak diketahui'}`)
         } finally {
             setLoading(false)
         }
