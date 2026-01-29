@@ -35,13 +35,13 @@ export function TestimonialCarousel({ testimonials }: TestimonialCarouselProps) 
                             <Star
                                 key={i}
                                 className={`h-5 w-5 ${i < currentTestimonial.rating
-                                        ? 'fill-gold-500 text-gold-500'
-                                        : 'text-gray-300'
+                                    ? 'fill-gold-500 text-gold-500'
+                                    : 'text-gray-300'
                                     }`}
                             />
                         ))}
                     </div>
-                    <p className="text-lg italic mb-6">"{currentTestimonial.comment}"</p>
+                    <p className="text-lg italic mb-6">&quot;{currentTestimonial.comment}&quot;</p>
                     <div className="flex justify-between items-center">
                         <div>
                             <p className="font-semibold">{currentTestimonial.customer_name}</p>
