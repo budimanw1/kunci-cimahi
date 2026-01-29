@@ -38,6 +38,10 @@ export default function AdminDashboardPage() {
 
     useEffect(() => {
         checkUser()
+        // Request notification permission
+        if ('Notification' in window) {
+            Notification.requestPermission()
+        }
     }, [])
 
     useEffect(() => {
@@ -47,9 +51,20 @@ export default function AdminDashboardPage() {
         // Subscribe to real-time updates
         const subscription = supabase
             .channel('bookings')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => {
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, (payload) => {
                 fetchBookings()
                 fetchStats()
+
+                // Show notification for new bookings
+                if (payload.eventType === 'INSERT' && Notification.permission === 'granted') {
+                    const newBooking = payload.new as Booking
+                    new Notification('Pesanan Baru Masuk!', {
+                        body: `${newBooking.customer_name} - ${newBooking.problem_type}`,
+                        icon: '/favicon.ico'
+                    })
+                    // Play a subtle sound
+                    const audio = new Audio('/notification.mp3') // Placeholder, browser default beep might suffice or need file
+                }
             })
             .subscribe()
 
@@ -62,6 +77,21 @@ export default function AdminDashboardPage() {
         const { data: { session } } = await supabase.auth.getSession()
         if (!session) {
             router.push('/admin/login')
+        }
+    }
+
+    // ... (keep fetchBookings and others same)
+
+    const getStatusLabel = (status: Booking['status']) => {
+        switch (status) {
+            case 'pending':
+                return 'Menunggu'
+            case 'on_the_way':
+                return 'Perjalanan'
+            case 'completed':
+                return 'Selesai'
+            default:
+                return status
         }
     }
 
@@ -336,7 +366,7 @@ export default function AdminDashboardPage() {
                                                     <Select
                                                         value={booking.status}
                                                         onChange={(e) => updateBookingStatus(booking.id, e.target.value as Booking['status'])}
-                                                        className="text-xs h-7 w-[110px]"
+                                                        className="text-xs h-8 w-[130px] px-2 py-0 cursor-pointer"
                                                     >
                                                         <option value="pending">Menunggu</option>
                                                         <option value="on_the_way">Perjalanan</option>
